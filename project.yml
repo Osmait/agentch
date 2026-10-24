@@ -1,4 +1,4 @@
-name: NotchHub
+name: Agentch
 options:
   deploymentTarget:
     macOS: "14.0"
@@ -8,20 +8,20 @@ settings:
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
 targets:
-  NotchHub:
+  Agentch:
     type: application
     platform: macOS
     sources:
-      - NotchHub
+      - Agentch
     configFiles:
       Debug: Config/Base.xcconfig
       Release: Config/Base.xcconfig
     settings:
       base:
-        PRODUCT_NAME: NotchHub
+        PRODUCT_NAME: Agentch
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_LSUIElement: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Notch Hub
+        INFOPLIST_KEY_CFBundleDisplayName: Agentch
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         MARKETING_VERSION: 0.1.0
         CURRENT_PROJECT_VERSION: 1

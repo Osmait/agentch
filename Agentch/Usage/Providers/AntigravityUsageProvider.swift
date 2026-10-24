@@ -110,7 +110,7 @@ actor AntigravityReportLoader {
 
         // Fresh private directory with `open` stubs so a lapsed login never pops a browser.
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("notchhub-agy-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("agentch-agy-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true,
                                                 attributes: [.posixPermissions: 0o700])
         defer { try? FileManager.default.removeItem(at: directory) }

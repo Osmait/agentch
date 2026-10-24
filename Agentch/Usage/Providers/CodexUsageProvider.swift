@@ -23,7 +23,7 @@ struct CodexUsageProvider: UsageProvider {
         let server = JSONLineProcess(executable: codex, arguments: ["app-server"])
         try server.start()
         try server.send(["id": 1, "method": "initialize",
-                         "params": ["clientInfo": ["name": "notchhub", "version": "0.1"]]])
+                         "params": ["clientInfo": ["name": "agentch", "version": "0.1"]]])
 
         return try await server.read(timeout: 20) { message in
             switch message["id"] as? Int {

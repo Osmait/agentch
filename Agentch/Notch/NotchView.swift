@@ -48,7 +48,7 @@ struct NotchView: View {
         .contextMenu {
             Button("Refresh Now") { store.refresh() }
             Divider()
-            Button("Quit Notch Hub") { NSApp.terminate(nil) }
+            Button("Quit Agentch") { NSApp.terminate(nil) }
         }
         .environment(\.colorScheme, .dark)
     }

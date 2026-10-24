@@ -1,8 +1,8 @@
-// Build defaults for anyone cloning Notch Hub. Put your own values in
+// Build defaults for anyone cloning Agentch. Put your own values in
 // Config/Local.xcconfig (git-ignored); see Local.xcconfig.example.
 
 BUNDLE_ID_PREFIX = com.example
-PRODUCT_BUNDLE_IDENTIFIER = $(BUNDLE_ID_PREFIX).notchhub
+PRODUCT_BUNDLE_IDENTIFIER = $(BUNDLE_ID_PREFIX).agentch
 
 // Ad-hoc signing works without an Apple account, but macOS treats every
 // rebuild as a new app, so the Keychain asks for access again each time.
