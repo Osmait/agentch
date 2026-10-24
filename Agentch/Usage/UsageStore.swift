@@ -50,8 +50,8 @@ final class UsageStore {
                     group.addTask {
                         do {
                             let usage = try await provider.fetch()
-                            let summary = [usage.fiveHour, usage.weekly]
-                                .map { $0.map { "\(Int($0.usedPercent))% → \($0.resetsAt?.description ?? "—")" } ?? "nil" }
+                            let summary = usage.windows
+                                .map { "\($0.label) \(Int($0.usedPercent))% → \($0.resetsAt?.description ?? "—")" }
                                 .joined(separator: " | ")
                             Self.log.info("\(provider.id, privacy: .public): \(summary, privacy: .public)")
                             return (provider.id, .loaded(usage))

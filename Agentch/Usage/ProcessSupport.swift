@@ -68,3 +68,28 @@ final class JSONLineProcess {
         throw UsageError("The process exited without responding")
     }
 }
+
+/// Reads generic passwords through `/usr/bin/security`. CLIs such as Claude Code store
+/// their tokens with that tool, so it is already on the item's access list and reading
+/// through it avoids a Keychain prompt every time the CLI rewrites the item.
+enum KeychainCLI {
+    /// Returns nil when there is no item for `service`.
+    static func password(service: String) throws -> Data? {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/security")
+        process.arguments = ["find-generic-password", "-s", service, "-w"]
+        let output = Pipe()
+        process.standardOutput = output
+        process.standardError = FileHandle.nullDevice
+        process.standardInput = FileHandle.nullDevice
+        try process.run()
+        let data = output.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+
+        switch process.terminationStatus {
+        case 0: return data
+        case 44: return nil
+        default: throw UsageError("No Keychain access (\(process.terminationStatus))")
+        }
+    }
+}

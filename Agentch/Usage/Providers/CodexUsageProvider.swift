@@ -47,20 +47,25 @@ struct CodexUsageProvider: UsageProvider {
     }
 
     private static func parse(_ limits: [String: Any]) -> ProviderUsage {
-        var usage = ProviderUsage(plan: (limits["planType"] as? String).map(Self.planName))
+        var fiveHour: UsageWindow?
+        var weekly: UsageWindow?
         for key in ["primary", "secondary"] {
             guard let raw = limits[key] as? [String: Any] else { continue }
-            let window = UsageWindow(
-                usedPercent: (raw["usedPercent"] as? NSNumber)?.doubleValue ?? 0,
-                resetsAt: (raw["resetsAt"] as? NSNumber).map { Date(timeIntervalSince1970: $0.doubleValue) }
-            )
+            func window(_ label: String) -> UsageWindow {
+                UsageWindow(label: label,
+                            usedPercent: (raw["usedPercent"] as? NSNumber)?.doubleValue ?? 0,
+                            resetsAt: (raw["resetsAt"] as? NSNumber).map { Date(timeIntervalSince1970: $0.doubleValue) })
+            }
             switch raw["windowDurationMins"] as? Int {
-            case fiveHourMinutes: usage.fiveHour = window
-            case weeklyMinutes: usage.weekly = window
-            default: if key == "primary" { usage.fiveHour = window } else { usage.weekly = window }
+            case fiveHourMinutes: fiveHour = window(UsageWindow.fiveHourLabel)
+            case weeklyMinutes: weekly = window(UsageWindow.weeklyLabel)
+            default:
+                if key == "primary" { fiveHour = window(UsageWindow.fiveHourLabel) }
+                else { weekly = window(UsageWindow.weeklyLabel) }
             }
         }
-        return usage
+        return ProviderUsage(plan: (limits["planType"] as? String).map(Self.planName),
+                             windows: [fiveHour, weekly].compactMap { $0 })
     }
 
     private static func planName(_ raw: String) -> String {

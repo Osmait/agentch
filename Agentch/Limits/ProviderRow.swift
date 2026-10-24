@@ -18,19 +18,16 @@ struct ProviderRow: View {
                     message("Loading…")
                 case .failed(let error):
                     message(error)
+                case .loaded(let usage) where usage.windows.isEmpty:
+                    message("No limits reported")
                 case .loaded(let usage):
-                    LimitBar(label: "5 hours",
-                             window: usage.fiveHour?.current(at: now),
-                             color: brand.primary,
-                             now: now,
-                             isOpen: isOpen,
-                             delay: 0.18 + Double(index) * 0.07)
-                    LimitBar(label: "Weekly",
-                             window: usage.weekly?.current(at: now),
-                             color: brand.secondary,
-                             now: now,
-                             isOpen: isOpen,
-                             delay: 0.23 + Double(index) * 0.07)
+                    ForEach(Array(usage.windows.enumerated()), id: \.offset) { position, window in
+                        LimitBar(window: window.current(at: now),
+                                 color: position == 0 ? brand.primary : brand.secondary,
+                                 now: now,
+                                 isOpen: isOpen,
+                                 delay: 0.18 + Double(position) * 0.05 + Double(index) * 0.07)
+                    }
                 }
             }
         }

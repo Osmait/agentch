@@ -37,16 +37,17 @@ struct AntigravityUsageProvider: UsageProvider {
         let group = report.first { classify($0.name) == pool }
         guard let group else { throw UsageError("No data for this group") }
 
-        var usage = ProviderUsage(plan: pool == .gemini ? "Gemini" : "Claude & GPT")
+        var fiveHour: UsageWindow?
+        var weekly: UsageWindow?
         for bucket in group.buckets {
-            guard let window = bucket.window else { continue }
             switch windowKind(bucket) {
-            case .fiveHour: usage.fiveHour = window
-            case .weekly: usage.weekly = window
+            case .fiveHour: fiveHour = bucket.window(UsageWindow.fiveHourLabel)
+            case .weekly: weekly = bucket.window(UsageWindow.weeklyLabel)
             case nil: continue
             }
         }
-        return usage
+        return ProviderUsage(plan: pool == .gemini ? "Gemini" : "Claude & GPT",
+                             windows: [fiveHour, weekly].compactMap { $0 })
     }
 
     /// "Gemini Models" → gemini, "Claude and GPT models" → thirdParty.
@@ -168,9 +169,9 @@ actor AntigravityReportLoader {
 
 extension AntigravityReportLoader.Bucket {
     /// A bucket without `remaining_fraction` is unknown, not full.
-    var window: UsageWindow? {
+    func window(_ label: String) -> UsageWindow? {
         guard let remainingFraction else { return nil }
         let used = 100 - max(0, min(100, remainingFraction * 100))
-        return UsageWindow(usedPercent: used, resetsAt: resetTime.flatMap(ISO8601.parse))
+        return UsageWindow(label: label, usedPercent: used, resetsAt: resetTime.flatMap(ISO8601.parse))
     }
 }

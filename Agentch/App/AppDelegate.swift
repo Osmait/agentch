@@ -6,6 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let usageStore = UsageStore(providers: [
         ClaudeUsageProvider(),
         CodexUsageProvider(),
+        CursorUsageProvider(),
         AntigravityUsageProvider(pool: .gemini),
         AntigravityUsageProvider(pool: .thirdParty)
     ])

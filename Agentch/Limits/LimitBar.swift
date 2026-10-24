@@ -2,8 +2,7 @@ import SwiftUI
 
 /// One limit: label, bar and percentage, with the reset date and time remaining underneath.
 struct LimitBar: View {
-    let label: String
-    let window: UsageWindow?
+    let window: UsageWindow
     let color: Color
     let now: Date
     let isOpen: Bool
@@ -12,14 +11,14 @@ struct LimitBar: View {
     private static let warning = Color(hex: 0xFF9F0A)
     private static let warningThreshold = 80.0
 
-    private var percent: Double { min(max(window?.usedPercent ?? 0, 0), 100) }
+    private var percent: Double { min(max(window.usedPercent, 0), 100) }
     private var isHot: Bool { percent >= Self.warningThreshold }
     private var barColor: Color { isHot ? Self.warning : color }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 8) {
-                Text(label)
+                Text(window.label)
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                     .frame(width: 46, alignment: .leading)
@@ -33,17 +32,18 @@ struct LimitBar: View {
             }
 
             HStack {
-                if let resetsAt = window?.resetsAt {
+                if let resetsAt = window.resetsAt {
                     Text("↻ \(LimitFormatting.resetDate(resetsAt))")
                         .foregroundStyle(.white.opacity(0.88))
-                    Spacer()
-                    Text(LimitFormatting.remaining(until: resetsAt, from: now))
+                } else if window.detail == nil {
+                    Text("Not used in this window")
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                if let trailing = window.detail ?? window.resetsAt.map({ LimitFormatting.remaining(until: $0, from: now) }) {
+                    Text(trailing)
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(.secondary)
-                } else {
-                    Text(window == nil ? "No data" : "Not used in this window")
-                        .foregroundStyle(.secondary)
-                    Spacer()
                 }
             }
             .font(.system(size: 10))

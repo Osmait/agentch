@@ -1,23 +1,31 @@
 import SwiftUI
 
-/// A rate-limit window (for example the 5 hour session or the weekly limit).
+/// A limit shown as one bar, such as the 5 hour session, the weekly limit or a monthly budget.
 struct UsageWindow: Equatable {
+    var label: String
     /// 0...100
     var usedPercent: Double
     var resetsAt: Date?
+    /// Shown instead of the time remaining, e.g. "$3.20 of $50".
+    var detail: String? = nil
 
     /// Once the reset time has passed the window is empty again,
     /// even if the source has not been refreshed yet.
     func current(at now: Date) -> UsageWindow {
         guard let resetsAt, resetsAt <= now else { return self }
-        return UsageWindow(usedPercent: 0, resetsAt: nil)
+        return UsageWindow(label: label, usedPercent: 0, resetsAt: nil)
     }
+}
+
+extension UsageWindow {
+    static let fiveHourLabel = "5 hours"
+    static let weeklyLabel = "Weekly"
 }
 
 struct ProviderUsage: Equatable {
     var plan: String?
-    var fiveHour: UsageWindow?
-    var weekly: UsageWindow?
+    /// In display order; the first bar uses the brand's primary color.
+    var windows: [UsageWindow] = []
 }
 
 enum ProviderLogo {
@@ -33,7 +41,7 @@ struct ProviderBrand {
     let logo: ProviderLogo
     let logoColor: Color
     let tileColor: Color
-    /// Bar colors for the 5 hour and weekly windows.
+    /// Bar colors for the first window and the ones after it.
     let primary: Color
     let secondary: Color
 }

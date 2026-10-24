@@ -2,7 +2,7 @@
 
 **Agentch** (agent + notch) is a tiny macOS app that lives in your MacBook's notch and shows how much of your AI coding subscriptions you have left.
 
-Hover over the notch and it springs open with the 5-hour and weekly limits for each agent, when each window resets and how long until it does. Move the pointer away and it folds back into an empty notch.
+Hover over the notch and it springs open with the limits for each agent (5-hour, weekly or monthly), when each window resets and how long until it does. Move the pointer away and it folds back into an empty notch.
 
 <p align="center">
   <img src="docs/images/demo.gif" alt="Hovering over the notch opens Agentch with Claude Code, Codex and Antigravity limits" width="600">
@@ -14,6 +14,7 @@ Hover over the notch and it springs open with the 5-hour and weekly limits for e
 | --- | --- | --- |
 | **Claude Code** | Pro / Max | Anthropic's OAuth usage endpoint, using the token Claude Code stores in the login Keychain |
 | **Codex** | Plus / Pro | `codex app-server` (`account/rateLimits/read`) |
+| **Cursor** | Free / Pro / Ultra | cursor.com usage summary, using the token `cursor-agent login` stores in the Keychain. Shows the monthly plan usage and on-demand spending |
 | **Antigravity** | Gemini, and Claude & GPT pools | `agy -p /usage --output-format json` |
 
 Every provider reads from the official CLI or credentials you already have on your Mac. Agentch has no account and no servers, and it doesn't depend on any third-party tool.
@@ -28,7 +29,7 @@ Bars turn amber once a window passes 80 %. Data refreshes every two minutes, and
 
 - macOS 14 or later (a Mac with a notch looks best; other displays get a notch-sized area under the menu bar)
 - Xcode 16+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
-- Whichever CLIs you want to track, signed in: `claude`, `codex`, `agy`
+- Whichever CLIs you want to track, signed in: `claude`, `codex`, `cursor-agent`, `agy`
 
 ## Build and run
 

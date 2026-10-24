@@ -47,9 +47,9 @@ struct ClaudeUsageProvider: UsageProvider {
         }
 
         let body = try JSONDecoder().decode(UsageResponse.self, from: data)
-        return ProviderUsage(plan: credentials.planName,
-                             fiveHour: body.fiveHour?.window,
-                             weekly: body.sevenDay?.window)
+        let windows = [body.fiveHour?.window(UsageWindow.fiveHourLabel),
+                       body.sevenDay?.window(UsageWindow.weeklyLabel)]
+        return ProviderUsage(plan: credentials.planName, windows: windows.compactMap { $0 })
     }
 
     // MARK: - Keychain
@@ -75,28 +75,10 @@ struct ClaudeUsageProvider: UsageProvider {
         }
     }
 
-    /// Claude Code writes this item with `/usr/bin/security`, so that tool is on the
-    /// item's access list. Reading through it avoids the "wants to use your confidential
-    /// information" prompt, which SecItemCopyMatching triggers again whenever Claude Code
-    /// rewrites the item while refreshing its token.
     fileprivate static func loadCredentials() throws -> Credentials {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/security")
-        process.arguments = ["find-generic-password", "-s", keychainService, "-w"]
-        let output = Pipe()
-        process.standardOutput = output
-        process.standardError = FileHandle.nullDevice
-        process.standardInput = FileHandle.nullDevice
-        try process.run()
-        let data = output.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
-
-        switch process.terminationStatus {
-        case 0: break
-        case 44: throw UsageError("No Claude Code session on this Mac")
-        default: throw UsageError("No Keychain access (\(process.terminationStatus))")
+        guard let data = try KeychainCLI.password(service: keychainService) else {
+            throw UsageError("No Claude Code session on this Mac")
         }
-
         let stored = try JSONDecoder().decode(StoredCredentials.self, from: data)
         guard let oauth = stored.claudeAiOauth else {
             throw UsageError("Claude Code is not using a subscription")
@@ -128,8 +110,8 @@ struct ClaudeUsageProvider: UsageProvider {
                 case resetsAt = "resets_at"
             }
 
-            var window: UsageWindow {
-                UsageWindow(usedPercent: utilization ?? 0, resetsAt: resetsAt.flatMap(ISO8601.parse))
+            func window(_ label: String) -> UsageWindow {
+                UsageWindow(label: label, usedPercent: utilization ?? 0, resetsAt: resetsAt.flatMap(ISO8601.parse))
             }
         }
 
