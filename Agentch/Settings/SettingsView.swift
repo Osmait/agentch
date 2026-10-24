@@ -1,24 +1,9 @@
 import SwiftUI
 
-struct SettingsView: View {
-    let store: UsageStore
-    let appearance: AppearanceSettings
-
-    var body: some View {
-        TabView {
-            AppearanceTab(appearance: appearance)
-                .tabItem { Label("Appearance", systemImage: "paintpalette") }
-            SubscriptionsTab(store: store)
-                .tabItem { Label("Subscriptions", systemImage: "list.bullet") }
-        }
-        .frame(width: 540, height: 700)
-    }
-}
-
 // MARK: - Subscriptions
 
 /// Turns subscriptions on and off in the panel.
-private struct SubscriptionsTab: View {
+struct SubscriptionsTab: View {
     let store: UsageStore
 
     var body: some View {
@@ -73,7 +58,7 @@ private struct ProviderToggleRow: View {
 
 // MARK: - Appearance
 
-private struct AppearanceTab: View {
+struct AppearanceTab: View {
     @Bindable var appearance: AppearanceSettings
 
     var body: some View {
