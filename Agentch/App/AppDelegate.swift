@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         CopilotUsageProvider(),
         GrokUsageProvider(),
         MuseUsageProvider(),
+        OpenCodeGoUsageProvider(),
         AntigravityUsageProvider(pool: .gemini),
         AntigravityUsageProvider(pool: .thirdParty)
     ])
