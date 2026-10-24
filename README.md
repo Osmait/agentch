@@ -5,7 +5,7 @@
 Hover over the notch and it springs open with the 5-hour and weekly limits for each agent, when each window resets and how long until it does. Move the pointer away and it folds back into an empty notch.
 
 <p align="center">
-  <img src="docs/images/panel.png" alt="Agentch open, showing Claude Code, Codex and Antigravity limits" width="620">
+  <img src="docs/images/demo.gif" alt="Hovering over the notch opens Agentch with Claude Code, Codex and Antigravity limits" width="600">
 </p>
 
 ## Supported subscriptions
@@ -19,6 +19,10 @@ Hover over the notch and it springs open with the 5-hour and weekly limits for e
 Every provider reads from the official CLI or credentials you already have on your Mac. Agentch has no account and no servers, and it doesn't depend on any third-party tool.
 
 Bars turn amber once a window passes 80 %. Data refreshes every two minutes, and again when you open the panel if it is older than 30 seconds.
+
+<p align="center">
+  <img src="docs/images/panel.png" alt="The expanded panel up close" width="560">
+</p>
 
 ## Requirements
 
