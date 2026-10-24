@@ -5,6 +5,7 @@ struct LimitsView: View {
     let store: UsageStore
     let isOpen: Bool
     let topInset: CGFloat
+    let openSettings: () -> Void
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
@@ -18,6 +19,7 @@ struct LimitsView: View {
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
                     }
+                    SettingsButton(action: openSettings)
                 }
                 .padding(.horizontal, 6)
 
@@ -33,5 +35,26 @@ struct LimitsView: View {
             .padding([.horizontal, .bottom], 12)
         }
         .foregroundStyle(.white)
+    }
+}
+
+/// Small gear in the header that opens Settings.
+private struct SettingsButton: View {
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "gearshape.fill")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(isHovered ? .white : .secondary)
+                .frame(width: 22, height: 22)
+                .background(.white.opacity(isHovered ? 0.12 : 0), in: Circle())
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .help("Settings")
+        .accessibilityLabel("Settings")
     }
 }

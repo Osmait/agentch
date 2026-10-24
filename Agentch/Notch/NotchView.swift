@@ -14,7 +14,7 @@ struct NotchView: View {
         let shape = NotchShape(bottomRadius: open ? 28 : 12)
 
         ZStack(alignment: .top) {
-            LimitsView(store: store, isOpen: open, topInset: notch.height)
+            LimitsView(store: store, isOpen: open, topInset: notch.height, openSettings: openSettings)
                 .frame(width: NotchViewModel.expandedWidth)
                 .fixedSize(horizontal: false, vertical: true)
                 .background(
