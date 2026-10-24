@@ -34,7 +34,15 @@ xcodebuild -project NotchHub.xcodeproj -scheme NotchHub -configuration Debug -de
 open build/Build/Products/Debug/NotchHub.app
 ```
 
-`project.yml` signs with an Apple Development identity so the Keychain "Always Allow" survives rebuilds. Change `DEVELOPMENT_TEAM` to your own team ID.
+Out of the box the app is signed ad hoc with the bundle ID `com.example.notchhub`, so no Apple account is needed. With ad-hoc signing macOS treats every rebuild as a new app and asks again for Keychain access to Claude Code's credentials. To avoid that, sign with your own identity:
+
+```sh
+cp Config/Local.xcconfig.example Config/Local.xcconfig
+# then set BUNDLE_ID_PREFIX, CODE_SIGN_IDENTITY and DEVELOPMENT_TEAM
+xcodegen generate
+```
+
+`Config/Local.xcconfig` is git-ignored.
 
 Right-click the panel for **Refresh Now** and **Quit Notch Hub**. To keep the panel open while working on the UI:
 
@@ -45,12 +53,13 @@ open build/Build/Products/Debug/NotchHub.app --args -pinOpen YES
 Logs:
 
 ```sh
-/usr/bin/log show --last 5m --info --predicate 'subsystem == "com.saulburgos.notchhub"'
+/usr/bin/log show --last 5m --info --predicate 'subsystem == "com.example.notchhub"'   # your bundle ID
 ```
 
 ## Project layout
 
 ```
+Config/       Build settings (bundle ID, signing)
 NotchHub/
   App/        App entry point and delegate
   Notch/      Notch geometry, panel window, hover handling and animated shape
@@ -59,3 +68,7 @@ NotchHub/
 ```
 
 Adding a subscription means writing a type that conforms to `UsageProvider` and adding it to the list in `AppDelegate`.
+
+## License
+
+[MIT](LICENSE)

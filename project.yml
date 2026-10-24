@@ -1,6 +1,5 @@
 name: NotchHub
 options:
-  bundleIdPrefix: com.saulburgos
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
@@ -14,20 +13,18 @@ targets:
     platform: macOS
     sources:
       - NotchHub
+    configFiles:
+      Debug: Config/Base.xcconfig
+      Release: Config/Base.xcconfig
     settings:
       base:
         PRODUCT_NAME: NotchHub
-        PRODUCT_BUNDLE_IDENTIFIER: com.saulburgos.notchhub
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_CFBundleDisplayName: Notch Hub
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         MARKETING_VERSION: 0.1.0
         CURRENT_PROJECT_VERSION: 1
-        # A stable identity keeps Keychain "Always Allow" valid across rebuilds.
-        CODE_SIGN_IDENTITY: "Apple Development"
-        CODE_SIGN_STYLE: Manual
-        DEVELOPMENT_TEAM: GKFPD2WC2B
         ENABLE_HARDENED_RUNTIME: NO
         ENABLE_APP_SANDBOX: NO
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES

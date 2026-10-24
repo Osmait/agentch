@@ -5,7 +5,7 @@ import OSLog
 @MainActor
 @Observable
 final class UsageStore {
-    nonisolated static let log = Logger(subsystem: "com.saulburgos.notchhub", category: "usage")
+    nonisolated static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "NotchHub", category: "usage")
 
     struct Entry: Identifiable {
         let provider: any UsageProvider
