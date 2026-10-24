@@ -13,13 +13,13 @@ final class NotchWindowController {
     /// Extra room around the expanded panel so the shadow is not clipped.
     private let shadowMargin: CGFloat = 40
 
-    init(store: UsageStore) {
+    init(store: UsageStore, openSettings: @escaping () -> Void) {
         self.store = store
         let screen = NotchGeometry.preferredScreen() ?? NSScreen.screens[0]
         model = NotchViewModel(geometry: .detect(on: screen))
         panel = NotchPanel(contentRect: .zero)
 
-        let root = NotchView(model: model, store: store)
+        let root = NotchView(model: model, store: store, openSettings: openSettings)
         let hosting = NSHostingView(rootView: root)
         hosting.sizingOptions = []
         panel.contentView = hosting

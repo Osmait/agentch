@@ -32,6 +32,10 @@ struct AntigravityUsageProvider: UsageProvider {
         }
     }
 
+    var title: String {
+        pool == .gemini ? "Antigravity · Gemini" : "Antigravity · Claude & GPT"
+    }
+
     func fetch() async throws -> ProviderUsage {
         let report = try await AntigravityReportLoader.shared.load()
         let group = report.first { classify($0.name) == pool }

@@ -3,6 +3,7 @@ import SwiftUI
 struct NotchView: View {
     @Bindable var model: NotchViewModel
     let store: UsageStore
+    let openSettings: () -> Void
 
     /// Opacity of the black tint over the blur when expanded.
     private let panelOpacity: Double = 0.74
@@ -47,6 +48,7 @@ struct NotchView: View {
         .onPreferenceChange(ContentHeightKey.self) { model.contentHeight = $0 }
         .contextMenu {
             Button("Refresh Now") { store.refresh() }
+            Button("Settings…") { openSettings() }
             Divider()
             Button("Quit Agentch") { NSApp.terminate(nil) }
         }

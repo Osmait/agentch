@@ -53,13 +53,24 @@ enum ProviderStatus: Equatable {
     case loaded(ProviderUsage)
     case failed(String)
     /// The tool is not installed or signed in on this Mac; the row is hidden.
-    case notConfigured
+    case notConfigured(String)
+
+    var isNotConfigured: Bool {
+        if case .notConfigured = self { return true }
+        return false
+    }
 }
 
 protocol UsageProvider: Sendable {
     var id: String { get }
     var brand: ProviderBrand { get }
+    /// Name in Settings, where providers sharing a brand need telling apart.
+    var title: String { get }
     func fetch() async throws -> ProviderUsage
+}
+
+extension UsageProvider {
+    var title: String { brand.name }
 }
 
 struct UsageError: LocalizedError {
