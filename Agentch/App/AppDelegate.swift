@@ -3,7 +3,8 @@ import AppKit
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var notchController: NotchWindowController?
-    private lazy var settingsController = SettingsWindowController(store: usageStore)
+    private let appearance = AppearanceSettings()
+    private lazy var settingsController = SettingsWindowController(store: usageStore, appearance: appearance)
     private let usageStore = UsageStore(providers: [
         ClaudeUsageProvider(),
         CodexUsageProvider(),
@@ -17,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        notchController = NotchWindowController(store: usageStore) { [weak self] in
+        notchController = NotchWindowController(store: usageStore, appearance: appearance) { [weak self] in
             self?.settingsController.show()
         }
         notchController?.start()

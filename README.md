@@ -52,7 +52,10 @@ xcodegen generate
 
 `Config/Local.xcconfig` is git-ignored.
 
-Click the gear in the panel header (or right-click the panel) for **Settings**; the context menu also has **Refresh Now** and **Quit Agentch**. Settings lists every subscription with its connection status and lets you turn each one off; turned-off subscriptions are hidden and never queried. To keep the panel open while working on the UI:
+Click the gear in the panel header (or right-click the panel) for **Settings**; the context menu also has **Refresh Now** and **Quit Agentch**. Settings has two tabs:
+
+- **Appearance**: pick a theme (Midnight, Graphite, Ocean, Aurora, Forest or the light Daylight), set the panel opacity and turn the background blur on or off, with a live preview.
+- **Subscriptions**: every provider with its connection status and a switch; turned-off subscriptions are hidden and never queried. To keep the panel open while working on the UI:
 
 ```sh
 open build/Build/Products/Debug/Agentch.app --args -pinOpen YES      # keep the panel open
@@ -71,6 +74,7 @@ Logs:
 Config/       Build settings (bundle ID, signing)
 Agentch/
   App/        App entry point and delegate
+  Appearance/ Themes and the opacity/blur settings
   Notch/      Notch geometry, panel window, hover handling and animated shape
   Limits/     The expanded view: provider rows, limit bars, formatting
   Settings/   The Settings window

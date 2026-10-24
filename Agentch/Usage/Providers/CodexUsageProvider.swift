@@ -7,10 +7,10 @@ struct CodexUsageProvider: UsageProvider {
     let id = "codex"
     let brand = ProviderBrand(name: "Codex",
                               logo: .asset("OpenAILogo"),
-                              logoColor: .white,
-                              tileColor: .white.opacity(0.1),
-                              primary: Color(hex: 0xE4E4E7),
-                              secondary: .white)
+                              logoColor: .primary,
+                              tileColor: .primary.opacity(0.1),
+                              primary: .primary.opacity(0.85),
+                              secondary: .primary)
 
     private static let fiveHourMinutes = 300
     private static let weeklyMinutes = 10_080

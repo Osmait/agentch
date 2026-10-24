@@ -35,8 +35,8 @@ struct ProviderRow: View {
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(.white.opacity(0.045))
-                .strokeBorder(.white.opacity(0.07))
+                .fill(Color.primary.opacity(0.045))
+                .strokeBorder(Color.primary.opacity(0.07))
         }
     }
 

@@ -5,15 +5,17 @@ import SwiftUI
 @MainActor
 final class SettingsWindowController {
     private let store: UsageStore
+    private let appearance: AppearanceSettings
     private var window: NSWindow?
 
-    init(store: UsageStore) {
+    init(store: UsageStore, appearance: AppearanceSettings) {
         self.store = store
+        self.appearance = appearance
     }
 
     func show() {
         if window == nil {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(store: store)))
+            let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(store: store, appearance: appearance)))
             window.title = "Agentch Settings"
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false

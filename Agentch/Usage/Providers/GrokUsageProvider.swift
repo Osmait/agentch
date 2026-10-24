@@ -6,10 +6,10 @@ struct GrokUsageProvider: UsageProvider {
     let id = "grok"
     let brand = ProviderBrand(name: "Grok",
                               logo: .monogram("G"),
-                              logoColor: .white,
-                              tileColor: .white.opacity(0.1),
-                              primary: Color(hex: 0xF4F4F5),
-                              secondary: Color(hex: 0xA1A1AA))
+                              logoColor: .primary,
+                              tileColor: .primary.opacity(0.1),
+                              primary: .primary.opacity(0.9),
+                              secondary: .primary.opacity(0.55))
 
     private static let billingURL = URL(string: "https://cli-chat-proxy.grok.com/v1/billing?format=credits")!
 

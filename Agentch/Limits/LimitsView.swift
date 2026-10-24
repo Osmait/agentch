@@ -34,7 +34,7 @@ struct LimitsView: View {
             .padding(.top, topInset + 6)
             .padding([.horizontal, .bottom], 12)
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(.primary)
     }
 }
 
@@ -47,9 +47,9 @@ private struct SettingsButton: View {
         Button(action: action) {
             Image(systemName: "gearshape.fill")
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(isHovered ? .white : .secondary)
+                .foregroundStyle(isHovered ? .primary : .secondary)
                 .frame(width: 22, height: 22)
-                .background(.white.opacity(isHovered ? 0.12 : 0), in: Circle())
+                .background(Color.primary.opacity(isHovered ? 0.12 : 0), in: Circle())
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)

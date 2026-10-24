@@ -6,10 +6,10 @@ struct CursorUsageProvider: UsageProvider {
     let id = "cursor"
     let brand = ProviderBrand(name: "Cursor",
                               logo: .asset("CursorLogo"),
-                              logoColor: .white,
-                              tileColor: .white.opacity(0.1),
-                              primary: Color(hex: 0xE8E8ED),
-                              secondary: Color(hex: 0xA1A1AA))
+                              logoColor: .primary,
+                              tileColor: .primary.opacity(0.1),
+                              primary: .primary.opacity(0.9),
+                              secondary: .primary.opacity(0.55))
 
     private static let keychainService = "cursor-access-token"
     private static let summaryURL = URL(string: "https://cursor.com/api/usage-summary")!

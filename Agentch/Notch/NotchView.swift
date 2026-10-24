@@ -3,15 +3,14 @@ import SwiftUI
 struct NotchView: View {
     @Bindable var model: NotchViewModel
     let store: UsageStore
+    let appearance: AppearanceSettings
     let openSettings: () -> Void
-
-    /// Opacity of the black tint over the blur when expanded.
-    private let panelOpacity: Double = 0.74
 
     var body: some View {
         let open = model.isOpen
         let notch = model.geometry.notchSize
         let shape = NotchShape(bottomRadius: open ? 28 : 12)
+        let theme = appearance.theme
 
         ZStack(alignment: .top) {
             LimitsView(store: store, isOpen: open, topInset: notch.height, openSettings: openSettings)
@@ -32,8 +31,11 @@ struct NotchView: View {
                alignment: .top)
         .background {
             ZStack {
-                VisualEffectView()
-                Color.black.opacity(open ? panelOpacity : 1)
+                if appearance.blur || !open {
+                    VisualEffectView(colorScheme: theme.colorScheme)
+                }
+                // Closed, the panel is just the hardware notch: solid black.
+                (open ? theme.tint.opacity(appearance.opacity) : .black)
             }
         }
         .clipShape(shape)
@@ -52,7 +54,9 @@ struct NotchView: View {
             Divider()
             Button("Quit Agentch") { NSApp.terminate(nil) }
         }
-        .environment(\.colorScheme, .dark)
+        .environment(\.colorScheme, theme.colorScheme)
+        .animation(.easeInOut(duration: 0.25), value: theme)
+        .animation(.easeInOut(duration: 0.15), value: appearance.opacity)
     }
 }
 

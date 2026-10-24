@@ -27,14 +27,14 @@ struct LimitBar: View {
 
                 Text("\(Int(percent.rounded()))%")
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(isHot ? Self.warning : .white)
+                    .foregroundStyle(isHot ? Self.warning : .primary)
                     .frame(width: 36, alignment: .trailing)
             }
 
             HStack {
                 if let resetsAt = window.resetsAt {
                     Text("↻ \(LimitFormatting.resetDate(resetsAt))")
-                        .foregroundStyle(.white.opacity(0.88))
+                        .foregroundStyle(.primary.opacity(0.88))
                 } else if window.detail == nil {
                     Text("Not used in this window")
                         .foregroundStyle(.secondary)
@@ -55,7 +55,7 @@ struct LimitBar: View {
     private var bar: some View {
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
-                Capsule().fill(.white.opacity(0.08))
+                Capsule().fill(Color.primary.opacity(0.08))
                 Capsule()
                     .fill(LinearGradient(colors: [barColor.opacity(0.55), barColor],
                                          startPoint: .leading, endPoint: .trailing))

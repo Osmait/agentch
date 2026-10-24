@@ -7,8 +7,8 @@ struct CopilotUsageProvider: UsageProvider {
     let id = "copilot"
     let brand = ProviderBrand(name: "Copilot",
                               logo: .asset("CopilotLogo"),
-                              logoColor: .white,
-                              tileColor: .white.opacity(0.1),
+                              logoColor: .primary,
+                              tileColor: .primary.opacity(0.1),
                               primary: Color(hex: 0x8B9CFF),
                               secondary: Color(hex: 0xC4CCFF))
 
