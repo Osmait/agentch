@@ -7,6 +7,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ClaudeUsageProvider(),
         CodexUsageProvider(),
         CursorUsageProvider(),
+        CopilotUsageProvider(),
+        GrokUsageProvider(),
+        MuseUsageProvider(),
         AntigravityUsageProvider(pool: .gemini),
         AntigravityUsageProvider(pool: .thirdParty)
     ])

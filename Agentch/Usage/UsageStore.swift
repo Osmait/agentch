@@ -16,6 +16,11 @@ final class UsageStore {
     private(set) var entries: [Entry]
     private(set) var lastUpdated: Date?
 
+    /// Providers the user actually has, in the configured order.
+    var visibleEntries: [Entry] {
+        entries.filter { $0.status != .notConfigured }
+    }
+
     private var isRefreshing = false
     private var timer: Timer?
 
@@ -55,6 +60,9 @@ final class UsageStore {
                                 .joined(separator: " | ")
                             Self.log.info("\(provider.id, privacy: .public): \(summary, privacy: .public)")
                             return (provider.id, .loaded(usage))
+                        } catch let error as UsageError where error.isNotConfigured {
+                            Self.log.info("\(provider.id, privacy: .public): not configured (\(error.message, privacy: .public))")
+                            return (provider.id, .notConfigured)
                         } catch {
                             Self.log.error("\(provider.id, privacy: .public): \(error.localizedDescription, privacy: .public)")
                             return (provider.id, .failed(error.localizedDescription))

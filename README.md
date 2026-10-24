@@ -15,6 +15,9 @@ Hover over the notch and it springs open with the limits for each agent (5-hour,
 | **Claude Code** | Pro / Max | Anthropic's OAuth usage endpoint, using the token Claude Code stores in the login Keychain |
 | **Codex** | Plus / Pro | `codex app-server` (`account/rateLimits/read`) |
 | **Cursor** | Free / Pro / Ultra | cursor.com usage summary, using the token `cursor-agent login` stores in the Keychain. Shows the monthly plan usage and on-demand spending |
+| **GitHub Copilot** | Free / Individual / Business | `copilot_internal/user`, using the token from the Copilot editor extensions or any account signed in to the GitHub CLI (`gh`). Shows monthly premium requests |
+| **Grok** | SuperGrok | Grok CLI billing endpoint, using the token `grok login` stores in `~/.grok/auth.json` |
+| **Muse Code** | Meta | `api.meta.ai/muse-code/key`, using the token `muse login` stores in the Keychain. Shows the 5-hour and weekly windows |
 | **Antigravity** | Gemini, and Claude & GPT pools | `agy -p /usage --output-format json` |
 
 Every provider reads from the official CLI or credentials you already have on your Mac. Agentch has no account and no servers, and it doesn't depend on any third-party tool.
@@ -29,7 +32,7 @@ Bars turn amber once a window passes 80 %. Data refreshes every two minutes, and
 
 - macOS 14 or later (a Mac with a notch looks best; other displays get a notch-sized area under the menu bar)
 - Xcode 16+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
-- Whichever CLIs you want to track, signed in: `claude`, `codex`, `cursor-agent`, `agy`
+- Whichever tools you want to track, signed in: `claude`, `codex`, `cursor-agent`, `gh` or a Copilot editor extension, `grok`, `muse`, `agy`. Tools that aren't installed or signed in are simply hidden.
 
 ## Build and run
 

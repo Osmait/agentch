@@ -74,10 +74,10 @@ final class JSONLineProcess {
 /// through it avoids a Keychain prompt every time the CLI rewrites the item.
 enum KeychainCLI {
     /// Returns nil when there is no item for `service`.
-    static func password(service: String) throws -> Data? {
+    static func password(service: String, account: String? = nil) throws -> Data? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/security")
-        process.arguments = ["find-generic-password", "-s", service, "-w"]
+        process.arguments = ["find-generic-password", "-s", service] + (account.map { ["-a", $0] } ?? []) + ["-w"]
         let output = Pipe()
         process.standardOutput = output
         process.standardError = FileHandle.nullDevice

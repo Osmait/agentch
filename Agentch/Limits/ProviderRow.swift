@@ -14,7 +14,7 @@ struct ProviderRow: View {
 
             VStack(spacing: 6) {
                 switch status {
-                case .loading:
+                case .loading, .notConfigured:
                     message("Loading…")
                 case .failed(let error):
                     message(error)
@@ -75,6 +75,12 @@ struct ProviderRow: View {
             Image(nsImage: NSWorkspace.shared.icon(forFile: path))
                 .resizable()
                 .scaledToFit()
+        case .monogram(let letter):
+            Text(letter)
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundStyle(brand.logoColor)
+                .frame(width: 28, height: 28)
+                .background(brand.tileColor, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
     }
 

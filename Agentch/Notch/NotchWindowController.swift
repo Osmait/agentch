@@ -12,7 +12,6 @@ final class NotchWindowController {
 
     /// Extra room around the expanded panel so the shadow is not clipped.
     private let shadowMargin: CGFloat = 40
-    private let panelHeight: CGFloat = 520
 
     init(store: UsageStore) {
         self.store = store
@@ -61,6 +60,8 @@ final class NotchWindowController {
     private func layoutPanel() {
         let frame = model.geometry.screenFrame
         let width = NotchViewModel.expandedWidth + shadowMargin * 2
+        // Tall enough for every provider; the transparent part never takes clicks.
+        let panelHeight = min(frame.height * 0.9, 1000)
         panel.setFrame(NSRect(x: frame.midX - width / 2,
                               y: frame.maxY - panelHeight,
                               width: width,

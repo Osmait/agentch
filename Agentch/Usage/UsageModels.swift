@@ -33,6 +33,8 @@ enum ProviderLogo {
     case asset(String)
     /// The icon of an installed app, shown as is.
     case appIcon(String)
+    /// A letter on the tile, for brands without a usable vector logo.
+    case monogram(String)
 }
 
 /// Visual identity of a provider in the panel.
@@ -50,6 +52,8 @@ enum ProviderStatus: Equatable {
     case loading
     case loaded(ProviderUsage)
     case failed(String)
+    /// The tool is not installed or signed in on this Mac; the row is hidden.
+    case notConfigured
 }
 
 protocol UsageProvider: Sendable {
@@ -60,7 +64,24 @@ protocol UsageProvider: Sendable {
 
 struct UsageError: LocalizedError {
     let message: String
-    init(_ message: String) { self.message = message }
+    /// True when the user simply doesn't use this tool, as opposed to a broken session.
+    let isNotConfigured: Bool
+
+    init(_ message: String) {
+        self.message = message
+        isNotConfigured = false
+    }
+
+    private init(message: String, isNotConfigured: Bool) {
+        self.message = message
+        self.isNotConfigured = isNotConfigured
+    }
+
+    /// Missing CLI or login: hides the provider instead of showing an error.
+    static func notConfigured(_ message: String) -> UsageError {
+        UsageError(message: message, isNotConfigured: true)
+    }
+
     var errorDescription: String? { message }
 }
 

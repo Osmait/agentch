@@ -86,7 +86,7 @@ struct CursorUsageProvider: UsageProvider {
         guard let data = try KeychainCLI.password(service: keychainService),
               let raw = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
               !raw.isEmpty
-        else { throw UsageError("Sign in by running cursor-agent login") }
+        else { throw UsageError.notConfigured("Sign in by running cursor-agent login") }
         return Token(raw: raw)
     }
 

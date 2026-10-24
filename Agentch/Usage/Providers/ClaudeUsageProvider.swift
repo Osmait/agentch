@@ -77,7 +77,7 @@ struct ClaudeUsageProvider: UsageProvider {
 
     fileprivate static func loadCredentials() throws -> Credentials {
         guard let data = try KeychainCLI.password(service: keychainService) else {
-            throw UsageError("No Claude Code session on this Mac")
+            throw UsageError.notConfigured("No Claude Code session on this Mac")
         }
         let stored = try JSONDecoder().decode(StoredCredentials.self, from: data)
         guard let oauth = stored.claudeAiOauth else {
@@ -134,6 +134,8 @@ enum ISO8601 {
     private static let plain = ISO8601DateFormatter()
 
     static func parse(_ string: String) -> Date? {
-        withFraction.date(from: string) ?? plain.date(from: string)
+        // ISO8601DateFormatter only understands milliseconds; trim micro- and nanoseconds.
+        let trimmed = string.replacingOccurrences(of: #"(\.\d{3})\d+"#, with: "$1", options: .regularExpression)
+        return withFraction.date(from: trimmed) ?? plain.date(from: trimmed)
     }
 }

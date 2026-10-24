@@ -21,7 +21,7 @@ struct LimitsView: View {
                 }
                 .padding(.horizontal, 6)
 
-                ForEach(Array(store.entries.enumerated()), id: \.element.id) { index, entry in
+                ForEach(Array(store.visibleEntries.enumerated()), id: \.element.id) { index, entry in
                     ProviderRow(brand: entry.provider.brand,
                                 status: entry.status,
                                 now: context.date,

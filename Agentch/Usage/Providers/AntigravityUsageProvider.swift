@@ -106,7 +106,7 @@ actor AntigravityReportLoader {
 
     private static func runUsageCommand() throws -> [Group] {
         guard let agy = CLILocator.find("agy") else {
-            throw UsageError("Antigravity CLI (agy) not found")
+            throw UsageError.notConfigured("Antigravity CLI (agy) not found")
         }
 
         // Fresh private directory with `open` stubs so a lapsed login never pops a browser.

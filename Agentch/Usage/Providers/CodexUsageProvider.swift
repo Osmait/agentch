@@ -17,7 +17,7 @@ struct CodexUsageProvider: UsageProvider {
 
     func fetch() async throws -> ProviderUsage {
         guard let codex = CLILocator.find("codex") else {
-            throw UsageError("Codex CLI not found")
+            throw UsageError.notConfigured("Codex CLI not found")
         }
 
         let server = JSONLineProcess(executable: codex, arguments: ["app-server"])
