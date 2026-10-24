@@ -87,3 +87,5 @@ Adding a subscription means writing a type that conforms to `UsageProvider` and 
 ## License
 
 [MIT](LICENSE)
+
+Provider logos come from [Simple Icons](https://simpleicons.org) (CC0) and [Lobe Icons](https://github.com/lobehub/lobe-icons) (MIT, the Grok logo). They are trademarks of their owners and are used only to identify each service.

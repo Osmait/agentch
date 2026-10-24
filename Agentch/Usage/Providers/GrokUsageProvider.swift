@@ -6,7 +6,7 @@ import SwiftUI
 struct GrokUsageProvider: UsageProvider {
     let id = "grok"
     let brand = ProviderBrand(name: "Grok",
-                              logo: .monogram("G"),
+                              logo: .asset("GrokLogo"),
                               logoColor: .primary,
                               tileColor: .primary.opacity(0.1),
                               primary: .primary.opacity(0.9),
