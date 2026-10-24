@@ -12,34 +12,56 @@ struct CursorUsageProvider: UsageProvider {
                               secondary: .primary.opacity(0.55))
 
     private static let keychainService = "cursor-access-token"
-    private static let summaryURL = URL(string: "https://cursor.com/api/usage-summary")!
+    private static let base = URL(string: "https://cursor.com")!
 
     func fetch() async throws -> ProviderUsage {
         let token = try Self.loadToken()
-        var request = URLRequest(url: Self.summaryURL)
-        request.setValue("WorkosCursorSessionToken=\(try token.userID())%3A%3A\(token.raw)", forHTTPHeaderField: "Cookie")
+        let cookie = "WorkosCursorSessionToken=\(try token.userID())%3A%3A\(token.raw)"
+
+        async let sand = try? Self.request("api/dashboard/get-sand-usage-status", cookie: cookie, post: true)
+        let summaryData = try await Self.request("api/usage-summary", cookie: cookie)
+        let summary = try JSONDecoder().decode(UsageSummary.self, from: summaryData)
+        let sandStatus = await sand.flatMap { try? JSONDecoder().decode(SandStatus.self, from: $0) }
+        return Self.parse(summary, sand: sandStatus)
+    }
+
+    private static func request(_ path: String, cookie: String, post: Bool = false) async throws -> Data {
+        var request = URLRequest(url: base.appendingPathComponent(path))
+        request.setValue(cookie, forHTTPHeaderField: "Cookie")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if post {
+            request.httpMethod = "POST"
+            request.httpBody = Data("{}".utf8)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(base.absoluteString, forHTTPHeaderField: "Origin")
+        }
         request.timeoutInterval = 15
 
         let (data, response) = try await URLSession.shared.data(for: request)
         switch (response as? HTTPURLResponse)?.statusCode ?? 0 {
-        case 200: break
+        case 200: return data
         case 401, 403: throw UsageError("Session expired: run cursor-agent login")
         case let status: throw UsageError("Cursor responded \(status)")
         }
-        return Self.parse(try JSONDecoder().decode(UsageSummary.self, from: data))
     }
 
-    private static func parse(_ summary: UsageSummary) -> ProviderUsage {
+    private static func parse(_ summary: UsageSummary, sand: SandStatus?) -> ProviderUsage {
         let cycleEnd = summary.billingCycleEnd.flatMap(ISO8601.parse)
         var windows: [UsageWindow] = []
+        let grok = sand?.window(now: Date())
 
-        if let plan = summary.individualUsage?.plan {
+        // Accounts unified with Grok spend from a weekly pool shared with Grok; the
+        // summary keeps reporting the old monthly plan, which then stays at 0%.
+        if let grok, sand?.isUnified == true, grok.resetsAt != nil {
+            windows.append(UsageWindow(label: UsageWindow.weeklyLabel, usedPercent: grok.usedPercent, resetsAt: grok.resetsAt))
+        } else if let plan = summary.individualUsage?.plan {
             // Percent fields are already percentages; fall back to cents when they are missing.
             let percent = plan.totalPercentUsed
                 ?? plan.limit.flatMap { $0 > 0 ? Double(plan.used ?? 0) / Double($0) * 100 : nil }
                 ?? 0
             windows.append(UsageWindow(label: "Monthly", usedPercent: percent, resetsAt: cycleEnd))
+            // Grok Bot allowance on accounts that aren't unified.
+            if let grok { windows.append(grok) }
         }
 
         // On-demand spending past the plan, when the user enabled it.
@@ -91,6 +113,25 @@ struct CursorUsageProvider: UsageProvider {
     }
 
     // MARK: - API response
+
+    /// Grok Bot ("Sand") allowance, or the weekly pool shared with Grok on unified accounts.
+    private struct SandStatus: Decodable {
+        let nextResetTimestampUtc: String?
+        let usagePercent: Double?
+        let hasNonZeroIncludedLimit: Bool?
+        let includedLimitZero: Bool?
+        let sandTrialExpiresAt: String?
+        let isUnified: Bool?
+
+        func window(now: Date) -> UsageWindow? {
+            let hasLimit = includedLimitZero.map { !$0 } ?? hasNonZeroIncludedLimit ?? false
+            let inTrial = !hasLimit && (sandTrialExpiresAt.flatMap(ISO8601.parse).map { $0 > now } ?? false)
+            guard hasLimit || inTrial || isUnified == true, let usagePercent else { return nil }
+            // A trial ends rather than resets.
+            let resetsAt = inTrial ? nil : nextResetTimestampUtc.flatMap(ISO8601.parse)
+            return UsageWindow(label: "Grok Bot", usedPercent: min(max(usagePercent, 0), 100), resetsAt: resetsAt)
+        }
+    }
 
     private struct UsageSummary: Decodable {
         struct Plan: Decodable {
