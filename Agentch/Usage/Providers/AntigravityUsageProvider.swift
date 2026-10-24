@@ -38,8 +38,9 @@ struct AntigravityUsageProvider: UsageProvider {
 
     func fetch() async throws -> ProviderUsage {
         let report = try await AntigravityReportLoader.shared.load()
-        let group = report.first { classify($0.name) == pool }
-        guard let group else { throw UsageError("No data for this group") }
+        guard let group = report.first(where: { classify($0.name) == .shared(pool) }) else {
+            throw UsageError("No data for this group")
+        }
 
         var fiveHour: UsageWindow?
         var weekly: UsageWindow?
@@ -50,17 +51,54 @@ struct AntigravityUsageProvider: UsageProvider {
             case nil: continue
             }
         }
+
+        // Some models, such as "Gemini 4 Argon", have their own quota on top of the
+        // shared one; show it as extra bars named after the model.
+        var modelWindows: [UsageWindow] = []
+        for model in report where classify(model.name) == .model(pool) {
+            let name = Self.shortName(model.name)
+            for bucket in model.buckets {
+                switch windowKind(bucket) {
+                case .weekly: bucket.window(name).map { modelWindows.append($0) }
+                case .fiveHour: bucket.window("\(name) 5h").map { modelWindows.append($0) }
+                case nil: continue
+                }
+            }
+        }
+
         return ProviderUsage(plan: pool == .gemini ? "Gemini" : "Claude & GPT",
-                             windows: [fiveHour, weekly].compactMap { $0 })
+                             windows: [fiveHour, weekly].compactMap { $0 } + modelWindows)
     }
 
-    /// "Gemini Models" → gemini, "Claude and GPT models" → thirdParty.
-    /// Versioned groups such as "Gemini 4 Argon" are separate quotas and are skipped.
-    private func classify(_ name: String) -> Pool? {
+    private enum GroupKind: Equatable {
+        /// The pool every model of the family draws from ("Gemini Models").
+        case shared(Pool)
+        /// A versioned model with its own quota ("Gemini 4 Argon").
+        case model(Pool)
+    }
+
+    /// "Gemini Models" → shared Gemini, "Claude and GPT models" → shared third party,
+    /// "Gemini 4 Argon" → a Gemini model quota.
+    private func classify(_ name: String) -> GroupKind? {
         let lower = name.lowercased()
-        if lower.contains("claude") || lower.contains("gpt") { return .thirdParty }
-        if lower.contains("gemini"), !lower.contains(where: \.isNumber) { return .gemini }
-        return nil
+        let family: Pool
+        if lower.contains("claude") || lower.contains("gpt") {
+            family = .thirdParty
+        } else if lower.contains("gemini") {
+            family = .gemini
+        } else {
+            return nil
+        }
+        let isShared = lower.contains("models") || !lower.contains(where: \.isNumber)
+        return isShared ? .shared(family) : .model(family)
+    }
+
+    /// "Gemini 4 Argon" → "Argon": the family and version are implied by the row.
+    private static func shortName(_ name: String) -> String {
+        let words = name.split(separator: " ").filter { word in
+            !["gemini", "claude", "gpt"].contains(word.lowercased()) && !word.allSatisfy { $0.isNumber || $0 == "." }
+        }
+        return words.isEmpty ? name : words.joined(separator: " ")
     }
 
     private enum WindowKind { case fiveHour, weekly }
