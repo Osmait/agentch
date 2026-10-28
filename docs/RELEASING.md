@@ -17,6 +17,12 @@ The same can be started from the terminal:
 gh workflow run release.yml -f bump=minor
 ```
 
+### Dry run
+
+Tick **Dry run** (or pass `-f dry_run=true`) to build, sign and notarize without creating a tag, a release or a cask update. The DMG is attached to the workflow run as an artifact for 7 days, so you can download it and check that it opens. Use it the first time you add the signing secrets.
+
+A run refuses to start when a release for that version already exists, drafts included: publish or delete the draft first.
+
 To build the same DMG locally (it lands in `dist/`):
 
 ```sh

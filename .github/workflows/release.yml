@@ -1,8 +1,10 @@
 # Run by hand from the Actions tab: picks the next version from the latest tag,
 # builds a DMG and publishes it as a GitHub release with a new tag. Signing,
 # notarization and the Homebrew tap update switch on by themselves once their
-# secrets exist; see docs/RELEASING.md.
+# secrets exist; see docs/RELEASING.md. A dry run does everything except
+# publishing: the DMG is kept as a downloadable artifact of the run.
 name: Release
+run-name: Release (${{ inputs.bump }})${{ inputs.dry_run && ' - dry run' || '' }}
 
 on:
   workflow_dispatch:
@@ -12,6 +14,10 @@ on:
         type: choice
         options: [patch, minor, major]
         default: patch
+      dry_run:
+        description: "Dry run: build, sign and notarize without publishing"
+        type: boolean
+        default: false
 
 concurrency: release
 
@@ -23,6 +29,7 @@ jobs:
     runs-on: macos-26
     env:
       BUILD_NUMBER: ${{ github.run_number }}
+      DRY_RUN: ${{ inputs.dry_run }}
       HAS_CERTIFICATE: ${{ secrets.DEVELOPER_ID_CERTIFICATE != '' }}
       HAS_NOTARY_KEY: ${{ secrets.NOTARY_KEY != '' }}
       HAS_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
@@ -34,6 +41,7 @@ jobs:
       - name: Pick the version
         env:
           BUMP: ${{ inputs.bump }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           latest="$(git tag --list 'v[0-9]*' --sort=-v:refname | head -n 1)"
           if [[ -z "$latest" ]]; then
@@ -45,6 +53,11 @@ jobs:
               minor) version="$major.$((minor + 1)).0" ;;
               *)     version="$major.$minor.$((patch + 1))" ;;
             esac
+          fi
+          # A draft has no tag yet, so a second run would pick the same version.
+          if [[ "$DRY_RUN" != true ]] && gh release view "v$version" > /dev/null 2>&1; then
+            echo "::error::A release for v$version already exists (maybe a draft). Publish or delete it first."
+            exit 1
           fi
           echo "Releasing $version (previous: ${latest:-none})"
           echo "VERSION=$version" >> "$GITHUB_ENV"
@@ -84,7 +97,16 @@ jobs:
       - name: Build the DMG
         run: scripts/release.sh "$VERSION"
 
+      - name: Keep the DMG from the dry run
+        if: env.DRY_RUN == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Agentch-${{ env.VERSION }}
+          path: dist/Agentch-${{ env.VERSION }}.dmg
+          retention-days: 7
+
       - name: Publish the release
+        if: env.DRY_RUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -101,7 +123,7 @@ jobs:
             --title "Agentch $VERSION" --notes "$notes" --generate-notes "${draft[@]}"
 
       - name: Update the Homebrew cask
-        if: env.HAS_CERTIFICATE == 'true' && env.HAS_NOTARY_KEY == 'true' && env.HAS_TAP_TOKEN == 'true'
+        if: env.DRY_RUN != 'true' && env.HAS_CERTIFICATE == 'true' && env.HAS_NOTARY_KEY == 'true' && env.HAS_TAP_TOKEN == 'true'
         env:
           TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
