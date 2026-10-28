@@ -1,4 +1,12 @@
-# Agentch
+<p align="center">
+  <img src="docs/images/icon.png" alt="Agentch app icon" width="128">
+</p>
+
+<h1 align="center">Agentch</h1>
+
+<p align="center">
+  <a href="https://github.com/Osmait/agentch/releases/latest"><strong>Download for macOS</strong></a>
+</p>
 
 **Agentch** (agent + notch) is a tiny macOS app that lives in your MacBook's notch and shows how much of your AI coding subscriptions you have left.
 
