@@ -5,7 +5,7 @@
 Hover over the notch and it springs open with the limits for each agent (5-hour, weekly or monthly), when each window resets and how long until it does. Move the pointer away and it folds back into an empty notch.
 
 <p align="center">
-  <img src="docs/images/demo.gif" alt="Hovering over the notch opens Agentch with Claude Code, Codex and Antigravity limits" width="600">
+  <img src="docs/images/demo.gif" alt="Hovering over the notch opens Agentch with the limits of every subscription" width="600">
 </p>
 
 ## Supported subscriptions
