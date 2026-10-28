@@ -29,10 +29,20 @@ Bars turn amber once a window passes 80 %. Data refreshes every two minutes, and
   <img src="docs/images/panel.png" alt="The expanded panel up close" width="560">
 </p>
 
+## Install
+
+Download the latest `Agentch-x.y.z.dmg` from [Releases](https://github.com/Osmait/agentch/releases), open it and drag Agentch to Applications. Or use Homebrew:
+
+```sh
+brew install --cask osmait/tap/agentch
+```
+
+Agentch has no Dock icon: once it's running, hover over the notch.
+
 ## Requirements
 
 - macOS 14 or later (a Mac with a notch looks best; other displays get a notch-sized area under the menu bar)
-- Xcode 16+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+- To build from source: Xcode 16+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 - Whichever tools you want to track, signed in: `claude`, `codex`, `cursor-agent`, `gh` or a Copilot editor extension, `grok`, `muse`, `opencode`, `agy`. Tools that aren't installed or signed in are simply hidden.
 
 ## Build and run
@@ -80,6 +90,8 @@ Agentch/
   Limits/     The expanded view: provider rows, limit bars, formatting
   Settings/   The Settings window
   Usage/      UsageStore, models and one provider per subscription
+scripts/      release.sh builds the DMG; see docs/RELEASING.md
+packaging/    Homebrew cask template
 ```
 
 Adding a subscription means writing a type that conforms to `UsageProvider` and adding it to the list in `AppDelegate`.

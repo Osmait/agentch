@@ -1,0 +1,97 @@
+# Builds a DMG for every version tag (v0.2.0, v1.0.0...) and attaches it to a
+# GitHub release. Signing, notarization and the Homebrew tap update switch on by
+# themselves once their secrets exist; see docs/RELEASING.md.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    env:
+      VERSION: ${{ github.ref_name }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      HAS_CERTIFICATE: ${{ secrets.DEVELOPER_ID_CERTIFICATE != '' }}
+      HAS_NOTARY_KEY: ${{ secrets.NOTARY_KEY != '' }}
+      HAS_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Import the Developer ID certificate
+        if: env.HAS_CERTIFICATE == 'true'
+        env:
+          CERTIFICATE: ${{ secrets.DEVELOPER_ID_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password="$(uuidgen)"
+          echo "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/certificate.p12"
+          echo "SIGN_IDENTITY=Developer ID Application" >> "$GITHUB_ENV"
+          echo "TEAM_ID=${{ secrets.APPLE_TEAM_ID }}" >> "$GITHUB_ENV"
+
+      - name: Prepare the notarization key
+        if: env.HAS_CERTIFICATE == 'true' && env.HAS_NOTARY_KEY == 'true'
+        env:
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
+        run: |
+          echo "$NOTARY_KEY" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+          echo "NOTARY_KEY_PATH=$RUNNER_TEMP/notary.p8" >> "$GITHUB_ENV"
+          echo "NOTARY_KEY_ID=${{ secrets.NOTARY_KEY_ID }}" >> "$GITHUB_ENV"
+          echo "NOTARY_ISSUER_ID=${{ secrets.NOTARY_ISSUER_ID }}" >> "$GITHUB_ENV"
+
+      - name: Build the DMG
+        run: scripts/release.sh "$VERSION"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${VERSION#v}"
+          notes="$(scripts/changelog.sh "$version")"
+          # Builds that aren't notarized stay as drafts, so they never reach users by accident.
+          draft=()
+          if [[ "$HAS_CERTIFICATE" != true || "$HAS_NOTARY_KEY" != true ]]; then
+            draft=(--draft)
+            notes="$notes"$'\n\n'"> Unsigned build: macOS will block it until it is signed and notarized."
+          fi
+          gh release create "$VERSION" "dist/Agentch-$version.dmg" \
+            --title "Agentch $version" --notes "$notes" "${draft[@]}"
+
+      - name: Update the Homebrew cask
+        if: env.HAS_CERTIFICATE == 'true' && env.HAS_NOTARY_KEY == 'true' && env.HAS_TAP_TOKEN == 'true'
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          version="${VERSION#v}"
+          sha="$(shasum -a 256 "dist/Agentch-$version.dmg" | cut -d ' ' -f 1)"
+          git clone "https://x-access-token:$TAP_TOKEN@github.com/${{ github.repository_owner }}/homebrew-tap.git" "$RUNNER_TEMP/tap"
+          mkdir -p "$RUNNER_TEMP/tap/Casks"
+          sed -e "s/{{VERSION}}/$version/" -e "s/{{SHA256}}/$sha/" packaging/homebrew/agentch.rb \
+            > "$RUNNER_TEMP/tap/Casks/agentch.rb"
+          cd "$RUNNER_TEMP/tap"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/agentch.rb
+          git commit -m "agentch $version"
+          git push
+
+      - name: Remove signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/notary.p8"
