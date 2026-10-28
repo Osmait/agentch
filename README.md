@@ -31,11 +31,7 @@ Bars turn amber once a window passes 80 %. Data refreshes every two minutes, and
 
 ## Install
 
-Download the latest `Agentch-x.y.z.dmg` from [Releases](https://github.com/Osmait/agentch/releases), open it and drag Agentch to Applications. Or use Homebrew:
-
-```sh
-brew install --cask osmait/tap/agentch
-```
+Download the latest `Agentch-x.y.z.dmg` from [Releases](https://github.com/Osmait/agentch/releases), open it and drag Agentch to Applications.
 
 Agentch has no Dock icon: once it's running, hover over the notch.
 
