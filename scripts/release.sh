@@ -16,7 +16,7 @@
 #
 # or an App Store Connect API key:
 #
-#   NOTARY_KEY_PATH, NOTARY_KEY_ID, NOTARY_ISSUER_ID
+#   NOTARY_KEY_PATH, NOTARY_KEY_ID, and NOTARY_ISSUER_ID for team keys
 #
 # Optional: BUILD_NUMBER (defaults to 1), BUNDLE_ID_PREFIX (defaults to com.saulburgos).
 set -euo pipefail
@@ -70,7 +70,9 @@ if [[ -n "${SIGN_IDENTITY:-}" ]]; then
     if [[ -n "${NOTARY_PROFILE:-}" ]]; then
         notary=(--keychain-profile "$NOTARY_PROFILE")
     elif [[ -n "${NOTARY_KEY_PATH:-}" ]]; then
-        notary=(--key "$NOTARY_KEY_PATH" --key-id "${NOTARY_KEY_ID:?}" --issuer "${NOTARY_ISSUER_ID:?}")
+        notary=(--key "$NOTARY_KEY_PATH" --key-id "${NOTARY_KEY_ID:?}")
+        # Team keys have an issuer ID; individual keys must be used without one.
+        if [[ -n "${NOTARY_ISSUER_ID:-}" ]]; then notary+=(--issuer "$NOTARY_ISSUER_ID"); fi
     fi
 
     if (( ${#notary[@]} )); then
