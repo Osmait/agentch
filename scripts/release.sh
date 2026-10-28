@@ -39,9 +39,10 @@ mkdir -p "$DIST"
 signing=(CODE_SIGN_STYLE=Manual)
 if [[ -n "${SIGN_IDENTITY:-}" ]]; then
     echo "==> Signing with $SIGN_IDENTITY"
-    # Notarization requires the hardened runtime and a secure timestamp.
+    # Notarization requires the hardened runtime and a secure timestamp, and rejects the
+    # get-task-allow debugging entitlement that Xcode adds to plain (non-archive) builds.
     signing+=(CODE_SIGN_IDENTITY="$SIGN_IDENTITY" DEVELOPMENT_TEAM="${TEAM_ID:?TEAM_ID is required with SIGN_IDENTITY}"
-              ENABLE_HARDENED_RUNTIME=YES OTHER_CODE_SIGN_FLAGS=--timestamp)
+              ENABLE_HARDENED_RUNTIME=YES OTHER_CODE_SIGN_FLAGS=--timestamp CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO)
 else
     echo "==> No SIGN_IDENTITY: signing ad hoc (the app won't open on other Macs without a warning)"
     signing+=(CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=)
@@ -77,7 +78,13 @@ if [[ -n "${SIGN_IDENTITY:-}" ]]; then
 
     if (( ${#notary[@]} )); then
         echo "==> Notarizing (this usually takes a few minutes)"
-        xcrun notarytool submit "$DMG" "${notary[@]}" --wait
+        result="$(xcrun notarytool submit "$DMG" "${notary[@]}" --wait --output-format json)"
+        status="$(plutil -extract status raw - <<< "$result")"
+        if [[ "$status" != "Accepted" ]]; then
+            echo "Notarization failed ($status). Apple's report:"
+            xcrun notarytool log "$(plutil -extract id raw - <<< "$result")" "${notary[@]}"
+            exit 1
+        fi
         xcrun stapler staple "$DMG"
         spctl --assess --type open --context context:primary-signature --verbose "$DMG"
     else
