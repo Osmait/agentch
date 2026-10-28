@@ -1,8 +1,7 @@
 # Changelog
 
 All notable changes to Agentch. Versions follow [Semantic Versioning](https://semver.org).
-
-## [Unreleased]
+Add a section for a version before releasing it; it becomes the summary of the release notes.
 
 ## [0.1.0]
 

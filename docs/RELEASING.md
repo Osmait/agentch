@@ -1,16 +1,21 @@
 # Releasing Agentch
 
-Pushing a version tag builds a DMG on GitHub Actions and attaches it to a GitHub release:
+Commits never change the version; it only changes when you release. To release:
+
+1. On GitHub, open **Actions → Release → Run workflow**.
+2. Pick what to increase from the latest release:
+   - **patch** (0.1.0 → 0.1.1): fixes
+   - **minor** (0.1.0 → 0.2.0): new features
+   - **major** (0.1.0 → 1.0.0): big changes
+3. Run it. It builds the DMG from the latest commit on `main`, then creates the `vX.Y.Z` tag and the GitHub release.
+
+The first release is always 0.1.0. The build number is the workflow run number. The release notes list the commits since the previous release; to put a summary above them, add a `## [X.Y.Z]` section to `CHANGELOG.md` before running.
+
+The same can be started from the terminal:
 
 ```sh
-# 1. Move the notes under [Unreleased] in CHANGELOG.md to a new "## [0.2.0]" section.
-# 2. Commit, tag and push.
-git commit -am "Release 0.2.0"
-git tag v0.2.0
-git push && git push --tags
+gh workflow run release.yml -f bump=minor
 ```
-
-The version comes from the tag, and the build number from the workflow run, so there is nothing to bump in the project. The release notes are the version's section of `CHANGELOG.md`.
 
 To build the same DMG locally (it lands in `dist/`):
 
