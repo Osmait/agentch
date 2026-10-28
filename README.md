@@ -86,7 +86,7 @@ Agentch/
   Limits/     The expanded view: provider rows, limit bars, formatting
   Settings/   The Settings window
   Usage/      UsageStore, models and one provider per subscription
-scripts/      release.sh builds the DMG; see docs/RELEASING.md
+scripts/      release.sh builds the DMG (see docs/RELEASING.md); make-icon.swift draws the app icon
 packaging/    Homebrew cask template
 ```
 
